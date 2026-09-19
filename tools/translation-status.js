@@ -60,6 +60,7 @@ const similarFrenchTranslationNames = new Set([
 
 const packsDir = 'pack'
 const packDir = 'core'
+//const packDir = 'dwl'
 
 /**
  * This is meant to be an approximation
@@ -138,7 +139,7 @@ for(const packFilename of referencePackFilenames){
     /** @type {Card[]} */
     const translationData = JSON.parse(translationFileString)
 
-    console.info(`Checking missing translations for ${packsDir}/${packDir}/${packFilename}`)
+    console.info(`\nChecking missing translations for ${packsDir}/${packDir}/${packFilename}`)
     /** @type {ReturnType<findMissingTranslations>} */
     let missingTranslations = [];
     for(const referenceCard of referenceData){
