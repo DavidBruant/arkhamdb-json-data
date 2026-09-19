@@ -109,6 +109,9 @@ const packsDir = 'pack'
 //const packDir = 'core'
 //const packDir = 'dwl'
 const packDir = 'ptc'
+//const packDir = 'return'
+//const packDir = 'side'
+
 /**
  * This is meant to be an approximation
  * 
@@ -208,16 +211,17 @@ for(const packFilename of referencePackFilenames){
             const translationCard = translationData.find(({code: code2}) => referenceCard.code === code2)
 
             if(!translationCard){
-                throw new TypeError(`Missing translated card for ${referenceFilepath} code ${referenceCard.code}`)
+                console.error(`Missing translated card for ${referenceFilepath} code ${referenceCard.code}`)
             }
+            else{
+                const missingTranslationsForThisCard = findMissingTranslations(translationCard, referenceCard)
 
-            const missingTranslationsForThisCard = findMissingTranslations(translationCard, referenceCard)
-
-            if(missingTranslationsForThisCard.length >= 1){
-                missingTranslations = [
-                    ...missingTranslations, 
-                    ...missingTranslationsForThisCard
-                ]
+                if(missingTranslationsForThisCard.length >= 1){
+                    missingTranslations = [
+                        ...missingTranslations, 
+                        ...missingTranslationsForThisCard
+                    ]
+                }
             }
         }
     }
