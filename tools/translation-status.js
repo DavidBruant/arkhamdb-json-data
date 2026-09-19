@@ -34,6 +34,7 @@ const languageDir = 'fr';
 // traits that are exactly the same in French as in English
 const similarFrenchTranslationTraits = new Set([
     undefined,
+    // core
     'Miskatonic.',
     'Miskatonic. Central.',
     'Mutation.',
@@ -43,17 +44,21 @@ const similarFrenchTranslationTraits = new Set([
     'Talent. Science.',
     'Obstacle.', 
     
+    // dwl
     'Dunwich. Central.',
     'Dunwich.',
     'Reporter.',
     'Train.',
-    'Dunwich.',
-    'Dunwich.',
+
+    // ptc
+    'Paris.',
+    'Assistant.'
 ])
 
 // name that are exactly the same in French as in English
 const similarFrenchTranslationNames = new Set([
     undefined,
+    // core
     'Barricade',
     'Endurance', 
     'M1911',
@@ -61,11 +66,34 @@ const similarFrenchTranslationNames = new Set([
     'French Hill',
     'Acolyte',
 
+    // dwl
     'La Bella Luna',
-    'Peter Clover',
+    //'Peter Clover',
     'Thrall',
     'Adaptable',
-    'Springfield M1903'
+    'Springfield M1903',
+    
+    // ptc
+    'Recharge',
+    'St. Barnabé', 
+    'Montparnasse', 
+    'Montmartre',
+    'Opéra Garnier', 
+    "Gare d'Orsay",
+    'Canal Saint-Martin', 
+    'Le Marais',
+    'Notre-Dame', 
+    'Suggestion',
+    "Porte de l'Avancée", 
+    'Chœur Gothique',
+    'Lupara',
+    'Fin', 
+    'Possession',
+    'Sophie',
+    'Improvisation',
+    'Poltergeist',
+    'Corrosion',
+    'Mano a Mano'
 
 ])
 
@@ -79,8 +107,8 @@ const similarFrenchTranslationFlavor = new Set([
 
 const packsDir = 'pack'
 //const packDir = 'core'
-const packDir = 'dwl'
-
+//const packDir = 'dwl'
+const packDir = 'ptc'
 /**
  * This is meant to be an approximation
  * 
@@ -105,10 +133,10 @@ function findMissingTranslations(translationCard, referenceCard){
             }
         }
         else{
-            if(prop === 'name'){
+            if(prop === 'name' || prop === 'back_name'){
                 if(
                     referenceCard.type_code === 'investigator' || 
-                    (referenceCard.type_code === 'asset' && referenceCard.traits?.includes('Ally.') && referenceCard.is_unique) || 
+                    (referenceCard.type_code === 'asset' && (referenceCard.traits?.includes('Ally.') || referenceCard.traits?.includes('Humanoid.') || referenceCard.traits?.includes('Bystander.')) && referenceCard.is_unique) || 
                     (referenceCard.type_code === 'enemy' && referenceCard.is_unique)
                 ){
                     // names of unique people/enemies aren't translated
