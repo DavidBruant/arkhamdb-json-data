@@ -33,7 +33,7 @@ const languageDir = 'fr';
 
 // traits that are exactly the same in French as in English
 const similarFrenchTranslationTraits = new Set([
-    '',
+    undefined,
     'Miskatonic.',
     'Miskatonic. Central.',
     'Mutation.',
@@ -41,26 +41,45 @@ const similarFrenchTranslationTraits = new Set([
     'Arkham. Central.',
     'Talent.',
     'Talent. Science.',
-    'Obstacle.'
+    'Obstacle.', 
+    
+    'Dunwich. Central.',
+    'Dunwich.',
+    'Reporter.',
+    'Train.',
+    'Dunwich.',
+    'Dunwich.',
 ])
 
 // name that are exactly the same in French as in English
 const similarFrenchTranslationNames = new Set([
-    '',
+    undefined,
     'Barricade',
     'Endurance', 
     'M1911',
     'Prestidigitation',
     'French Hill',
-    'Acolyte'
+    'Acolyte',
+
+    'La Bella Luna',
+    'Peter Clover',
+    'Thrall',
+    'Adaptable',
+    'Springfield M1903'
+
+])
+
+// flavor texts that are exactly the same in French as in English
+const similarFrenchTranslationFlavor = new Set([
+    undefined,
+    'Negotium perambulans in tenebris...'
 ])
 
 
 
-
 const packsDir = 'pack'
-const packDir = 'core'
-//const packDir = 'dwl'
+//const packDir = 'core'
+const packDir = 'dwl'
 
 /**
  * This is meant to be an approximation
@@ -77,7 +96,7 @@ function findMissingTranslations(translationCard, referenceCard){
         const translationText = translationCard[prop];
 
         if(prop === 'traits'){
-            if(!similarFrenchTranslationTraits.has(translationText || '') && translationText === referenceText){
+            if(!similarFrenchTranslationTraits.has(translationText) && translationText === referenceText){
                 missingTranslations.push({
                     referenceCard,
                     translationCard,
@@ -95,7 +114,7 @@ function findMissingTranslations(translationCard, referenceCard){
                     // names of unique people/enemies aren't translated
                 }
                 else{
-                    if(translationText === referenceText && !similarFrenchTranslationNames.has(translationText || '')){
+                    if(translationText === referenceText && !similarFrenchTranslationNames.has(translationText)){
                         missingTranslations.push({
                             referenceCard,
                             translationCard,
@@ -106,14 +125,25 @@ function findMissingTranslations(translationCard, referenceCard){
 
             }
             else{
-                // base case, if texts are different, they're a translation
-                if(referenceText && translationText && translationText === referenceText){
-                    missingTranslations.push({
+                if(prop === 'flavor'){
+                    if(translationText === referenceText && !similarFrenchTranslationFlavor.has(translationText)){
+                        missingTranslations.push({
                             referenceCard,
                             translationCard,
                             property: prop
-                    })
-                    
+                        })
+                    }
+                }
+                else{
+                    // base case, if texts are different, they're a translation
+                    if(referenceText && translationText && translationText === referenceText){
+                        missingTranslations.push({
+                                referenceCard,
+                                translationCard,
+                                property: prop
+                        })
+                        
+                    }
                 }
             }
         }
