@@ -1,35 +1,14 @@
 //@ts-check
 
 import {join} from 'node:path'
-import {readFile} from 'node:fs/promises'
+import {readFile, readdir} from 'node:fs/promises'
 
-
-/**
- * Tool to assess translation status for a given language
- * 
- */
-
-const translationDir = 'translations'
-const languageDir = 'fr';
-
-// get reference for a given file
-
-const packsDir = 'pack'
-const packDir = 'core'
-const packFilename = 'core.json'
-//const packFilename = 'core_2026_encounter.json'
-
-const referenceFilepath = join(import.meta.dirname, '..', packsDir, packDir, packFilename)
-const translationFilepath = join(import.meta.dirname, '..', translationDir, languageDir, packsDir, packDir, packFilename)
-
-const referenceFileString = await readFile(referenceFilepath, 'utf-8')
-const translationFileString = await readFile(translationFilepath, 'utf-8')
 
 /** 
  * @typedef {Object} Card
  * @prop {string} code
  * @prop {string} type_code
- * @prop {string} name
+ * @prop {string} [name]
  * @prop {string} [slot]
  * @prop {string} [traits]
  * @prop {string} [text]
@@ -41,14 +20,16 @@ const translationFileString = await readFile(translationFilepath, 'utf-8')
  * 
 */
 
-/** @type {Card[]} */
-const referenceData = JSON.parse(referenceFileString)
-/** @type {Card[]} */
-const translationData = JSON.parse(translationFileString)
-
 const translatableProperties = /** @type {const} */ (['name', 'traits', 'text', 'flavor', 'back_name', 'back_flavor', 'back_text']);
 
-/** @typedef {translatableProperties[keyof translatableProperties]} TranslatableProperty */
+
+/**
+ * Tool to assess translation status for a given language
+ * 
+ */
+
+const translationDir = 'translations'
+const languageDir = 'fr';
 
 // traits that are exactly the same in French as in English
 const similarFrenchTranslationTraits = new Set([
@@ -59,15 +40,26 @@ const similarFrenchTranslationTraits = new Set([
     'Arkham.',
     'Arkham. Central.',
     'Talent.',
-    'Talent. Science.'
+    'Talent. Science.',
+    'Obstacle.'
 ])
 
 // name that are exactly the same in French as in English
 const similarFrenchTranslationNames = new Set([
+    '',
     'Barricade',
+    'Endurance', 
+    'M1911',
+    'Prestidigitation',
+    'French Hill',
+    'Acolyte'
 ])
 
 
+
+
+const packsDir = 'pack'
+const packDir = 'core'
 
 /**
  * This is meant to be an approximation
@@ -77,31 +69,37 @@ const similarFrenchTranslationNames = new Set([
  */
 function findMissingTranslations(translationCard, referenceCard){
 
+    const missingTranslations = []
+
     for(const prop of translatableProperties){
         const referenceText = referenceCard[prop];
         const translationText = translationCard[prop];
 
         if(prop === 'traits'){
             if(!similarFrenchTranslationTraits.has(translationText || '') && translationText === referenceText){
-                // untranslated
-                console.log('Missing translation', packDir, packFilename, 'card', referenceCard.code)
-                console.log('Reference', prop, referenceText)
-                console.log('Translation', prop, translationText)
+                missingTranslations.push({
+                    referenceCard,
+                    translationCard,
+                    property: prop
+                })
             }
         }
         else{
             if(prop === 'name'){
                 if(
                     referenceCard.type_code === 'investigator' || 
-                    (referenceCard.type_code === 'asset' && referenceCard.traits?.includes('Ally') && referenceCard.is_unique)
+                    (referenceCard.type_code === 'asset' && referenceCard.traits?.includes('Ally.') && referenceCard.is_unique) || 
+                    (referenceCard.type_code === 'enemy' && referenceCard.is_unique)
                 ){
-                    // names of unique people aren't translated
+                    // names of unique people/enemies aren't translated
                 }
                 else{
                     if(translationText === referenceText && !similarFrenchTranslationNames.has(translationText || '')){
-                        console.log('Missing translation', packDir, packFilename, 'card', referenceCard.code)
-                        console.log('Reference', prop, referenceText)
-                        console.log('Translation', prop, translationText)
+                        missingTranslations.push({
+                            referenceCard,
+                            translationCard,
+                            property: prop
+                        })
                     }
                 }
 
@@ -109,32 +107,75 @@ function findMissingTranslations(translationCard, referenceCard){
             else{
                 // base case, if texts are different, they're a translation
                 if(referenceText && translationText && translationText === referenceText){
-                    console.log('Missing translation', packDir, packFilename, 'card', referenceCard.code)
-                    console.log('Reference', prop, referenceText)
-                    console.log('Translation', prop, translationText)
+                    missingTranslations.push({
+                            referenceCard,
+                            translationCard,
+                            property: prop
+                    })
+                    
                 }
             }
-            
         }
-
-        
     }
 
-
+    return missingTranslations
 }
 
 
-for(const referenceCard of referenceData){
-    // for+find is O(n³) and maybe that's ok for the number of cards
-    const translationCard = translationData.find(({code: code2}) => referenceCard.code === code2)
 
-    if(!translationCard){
-        console.error
-        throw new TypeError(`Missing translated card for ${referenceFilepath} code ${referenceCard.code}`)
+const referencePackFilenames = await readdir(join(import.meta.dirname, '..', packsDir, packDir))
+
+
+for(const packFilename of referencePackFilenames){
+    const referenceFilepath = join(import.meta.dirname, '..', packsDir, packDir, packFilename)
+    const translationFilepath = join(import.meta.dirname, '..', translationDir, languageDir, packsDir, packDir, packFilename)
+
+    const referenceFileString = await readFile(referenceFilepath, 'utf-8')
+    const translationFileString = await readFile(translationFilepath, 'utf-8')
+
+    /** @type {Card[]} */
+    const referenceData = JSON.parse(referenceFileString)
+    /** @type {Card[]} */
+    const translationData = JSON.parse(translationFileString)
+
+    console.info(`Checking missing translations for ${packsDir}/${packDir}/${packFilename}`)
+    /** @type {ReturnType<findMissingTranslations>} */
+    let missingTranslations = [];
+    for(const referenceCard of referenceData){
+        const referenceCardHasTranslatedProperties = translatableProperties.some(prop => typeof referenceCard[prop] === 'string')
+
+        if(referenceCardHasTranslatedProperties){
+            // for+find is O(n³) and maybe that's ok for the number of cards
+            const translationCard = translationData.find(({code: code2}) => referenceCard.code === code2)
+
+            if(!translationCard){
+                throw new TypeError(`Missing translated card for ${referenceFilepath} code ${referenceCard.code}`)
+            }
+
+            const missingTranslationsForThisCard = findMissingTranslations(translationCard, referenceCard)
+
+            if(missingTranslationsForThisCard.length >= 1){
+                missingTranslations = [
+                    ...missingTranslations, 
+                    ...missingTranslationsForThisCard
+                ]
+            }
+        }
     }
 
-    findMissingTranslations(translationCard, referenceCard)
+    if(missingTranslations.length === 0){
+        console.log(`No missing ${languageDir} translations for ${packsDir}/${packDir}/${packFilename}`)
+    }
+    else{
+        for(const {referenceCard, translationCard, property} of missingTranslations){
+            console.log('Missing translation', packDir, packFilename, 'card', referenceCard.code, 'property', property)
+            console.log('Reference:', referenceCard[property])
+            console.log('Translation:',  translationCard[property])
+        }
+    }
 
+
+    
 
 }
 
