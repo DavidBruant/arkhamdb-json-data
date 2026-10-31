@@ -97,20 +97,20 @@
     {
         "code": "83013",
         "name": "Neith",
-        "subname": "Harbinger of the Abyss",
-        "text": "Hunter. Retaliate\n<b>Forced</b> - After horror from Neith's attack defeats an investigator or [[Ally]] asset: That card is <i>\"taken by the abyss.\"</i>\n<b>Forced</b> - When Neith is dealt any amount of damage from an attack, if there is at least 1 dreamer at her location: Remove 1 dreamer from her location and cancel 1 damage just dealt to Neith.",
+        "subname": "Héraut de l'Abîme",
+        "text": "Chasseur. Riposte\n<b>Forcé</b> - Après qu'une horreur infligée par une attaque de Neith's a vaincu un investigateur ou un soutien [[Allié]] : cette carte est <i>\"prise par l'abîme\".</i>\n<b>Forcé</b> - Quand n'importe quelle quantité de dégâts d'une attaque est infligée à Neith, s'il y a au moins 1 rêveur dans son lieu : retirez 1 rêveur de son lieu et annulez 1 dégât qui vient d'être infligé à Neith.",
         "traits": "Humanoïde. Fraternité. Élite."
     },
     {
         "code": "83014",
         "name": "Humble Suppliant",
-        "text": "<b>Spawn</b> - Any [[Cairo]] location (with a [[Brotherhood]] enemy, if able).\nAloof.\nEach [[Brotherhood]] enemy at Humble Supplicant's location cannot be attacked or damaged.\n<b>Forced</b> - When the enemy phase ends: Move Humble Supplicant once toward the nearest [[Brotherhood]] enemy, if able.",
+        "text": "<b>Génération</b> - N'importe quel lieu [[Le Caire]] (avec un ennemi [[Fraternité]], si possible).\nDistant.\nAucun ennemi [[Fraternité]] dans le lieu de l'Humble Suppliant's ne peut être attaqué ou subir de dégâts.\n<b>Forcé</b> - Quand la phase des Ennemis se termine : déplacez l'Humble Suppliant une fois en direction de l'ennemi [[Fraternité]] le plus proche, si possible.",
         "traits": "Humanoïde. Cultiste."
     },
     {
         "code": "83015",
         "name": "Créature de l'Abîme",
-        "text": "Retaliate.\nX is the strength of the abyss.\n<b>Forced</b> - After Creature from the Abyss enters play, if the strength of the abyss is 2 or lower: Add 1 strength to the abyss.\n<b>Forced</b> - After Creature from the Abyss is defeated, if the strength of the abyss is 5 or higher: Remove 1 strength from the abyss.",
+        "text": "Riposte.\nX est la force de l'abîme.\n<b>Forcé</b> - Après l'entrée en jeu de la Créature de l'Abîme, si la force de l'abîme est 2 ou moins : ajoutez 1 force à l'abîme.\n<b>Forcé</b> - Après que la Créature de l'Abîme a été vaincue, si la force de l'abîme est d'aun moins 5 : retirez 1 force from l'abîme.",
         "traits": "Monstre. Contrées du Rêve."
     },
     {
@@ -121,11 +121,11 @@
     },
     {
         "code": "83017",
-        "flavor": "With members of the Brotherhood still at large, your research had to be done in secret, away from prying eyes. Now that you are exposed, you know that anyone could be a spy for the secret cabal - even members of Winlock's expedition. It is a risk you must take in order to stop their plot. Regardless, knowing they could strike at any moment sets your nerves on edge. Sooner or later, they will show their hand, and you will have to be ready.",
+        "flavor": "Avec des membres de la Fraternité toujours en liberté, vous devez mener vos recherches dans le plus grand secret. Maintenant que vous avez été découvert, vous savez que n'importe qui peut être un espion de cette cabale secrète - même les membres de l'expédition Winlock. C'est un risque que vous devez prendre pour déjouer leur manigance. Malgré tout, savoir qu'ils peuvent frapper à tout moment vous met à bout de nerf. Ils se montreront tôt ou tard. et vous devez être prêt à les recevoir.",
         "name": "La Fraternité Attend son Heure",
         "back_name": "La Vengeance de la Fraternité",
-        "back_flavor": "Having found the perfect moment to strike, the remaining members of the Brotherhood ambush you in the night. \"For Nephren-Ka! For Xzharah!\" they cry out in exultation as they surround your camp. Their eyes are burning red with unnatural power, their muscles bulging and their veins pulsing with bizarre fluid. Nothing you say deters their attack, and you wonder if there is any humanity left in their minds at all.",
-        "back_text": "In player order, each investigator takes a random [[Brotherhood]] enemy from under the scenario reference card and spawns it engaged with him or her, until either each of the enemies under the scenario reference card have been spawned, or each investigator has spawned an enemy in this way. Spawn each enemy still remaining under the scenario reference card, one at a time, at empty locations farthest from the Expedition Camp. <i>(Ignore all \"<b>Spawn</b>\" instructions on those enemies.)</i>\nShuffle the encounter discard pile into the encounter deck.\nAdd 1 strength to the abyss."
+        "back_flavor": "Ayant trouvé le moment parfait pour agir, les derniers membres de la Fraternité vous tendent une embuscade en pleine nuit. \"Pour Nephren-ka ! Pour Xzharah !\", hurlent-t-ils en exultant alors qu'ils encerclent votre campement. Leurs yeux rougeoient d'un pouvoir surnaturel, leurs muscles saillent et leurs veines pulsent remplies d'un fluide étrange. Rien de ce que vous pourrez dire ne les dissuadera d'attaquer, et vous vous demandez s'il reste une once d'humanité dans leurs esprits.",
+        "back_text": "Dans l'ordre des joueurs, chaque investigateur prend un ennemi [[Fraternité]] au hasard sous la carte de référence du scénario et le génère engagé avec lui ; continuez jusqu'à ce que tous les ennemis sous la carte de référence du scénario aient été générés, soit jusqu'à ce que chaque investigateur a généré un ennemi de cette manière. Générez chaque ennemi restant sous la carte de référence du scénario, un à la fois dans les lieux vides les plus éloignés du Campement de l'Expédition. <i>(Ignorez les instructions \"<b>Génération</b>\" sur ces ennemis.)</i>\nMélangez la pile de défausse Rencontre dans le deck Rencontre.\nAjoutez 1 force à l'abîme."
     },
     {
         "code": "83018",
