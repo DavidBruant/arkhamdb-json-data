@@ -131,7 +131,7 @@
         "code": "83018",
         "flavor": "Ces sinistres machinations ne menacent pas seulement notre monde, mais également un autre. Vous n'avez qu'une seule chance de les empêcher d'accomplir leurs objectifs. Il est temps d'agir.",
         "name": "Complot au Cœur des Ténèbres",
-        "text": "Les investigateurs ne peuvent pas entamer de <b>Discussion</b> avec les ennemis [[Fraternité]].\nAucun ennemi [[Fraternité]] ne peut être retourné.\n<b>Forcé</b> - Après que la 4<sup>e</sup> et la 8<sup>e</sup> fatalité ont été placées sur cette intrigue : ajoutez 1 force à l'abîme.",
+        "text": "Les investigateurs ne peuvent pas entamer de <b>Discussion</b> avec les ennemis [[Fraternité]].\nAucun ennemi [[Fraternité]] ne peut être retourné.\n<b>Forcé</b> - Après que la 4ème et la 8ème fatalité ont été placées sur cette intrigue : ajoutez 1 force à l'abîme.",
         "back_name": "Une Prophétie Accomplie",
         "back_flavor": "\"C'est fait.\" Xzharah plonge sa lame dans le dernier des rêveurs. Baignée de sang écarlate encore chaud, la surface étincelante de l'arme dévore les forces de la victime. \"Avec cette âme, je suis enfin complet.\"\nL'abîme est plongé dans un effroyable silence. Nul ne peut contester l'autorité et le pouvoir du nouveau seigneur de ce monde. De grossières créatures ténébreuses rampent hors de leurs fosses pour rendre hommage à leur maître. Tandis que Xzharah arpente son domaine, la brume s'enroule autour de ses pieds à chaque pas. D'innombrables créatures ailées s'inclinent sur son passage en signe de soumission.\nCe monde est à lui, le nôtre est le prochain.",
         "back_text": "Chaque investigateur est vaincu.\nChaque investigateur vaincu est <i>\"pris par l'abîme\".</i>\n<b>(→C1)</b>"
