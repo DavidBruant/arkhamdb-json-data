@@ -1,5 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://arkham-horror-lcg-schemas.invalid/schema/translated_card_schema.json",
     "description": "Schema for translated cards. Translated card are like the English cards, but only with a 'code' and the string properties that need translating.",
     "$comment": "For now, fields here are duplicate of card_schema.json. In the future, we could use $id and $ref to prevent duplication",
     "type": "object",

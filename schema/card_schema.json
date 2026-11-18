@@ -1,8 +1,10 @@
 {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://arkham-horror-lcg-schemas.invalid/schema/card_schema.json",
     "type": "object",
     "required": ["code", "pack_code", "position", "quantity"],
     "additionalProperties": false,
-    "dependencies": {
+    "dependentRequired": {
         "name": ["faction_code", "type_code"]
     },
     "$defs": {

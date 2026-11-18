@@ -1,4 +1,8 @@
 {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://arkham-horror-lcg-schemas.invalid/schema/cycle_schema.json",
+    "type": "object",
+    "required": ["code", "name", "position", "size"],
     "additionalProperties": false,
     "properties": {
         "code": {
@@ -17,7 +21,5 @@
             "minimum": 1,
             "type": "integer"
         }
-    },
-    "required": ["code", "name", "position", "size"],
-    "type": "object"
+    }
 }
