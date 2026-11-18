@@ -1,0 +1,81 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://arkham-horror-lcg-schemas.invalid/schema/taboos_schema.json",
+    "type": "array",
+    "items": { "$ref": "#/$defs/taboo" },
+    "$defs": {
+        "taboo": {
+            "type": "object",
+            "required": ["code", "name", "active", "date_start"],
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "number"
+                },
+                "code": {
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "name": {
+                    "minLength": 1,
+                    "type": "string"
+                },
+                "active": {
+                    "const": 1
+                },
+                "date_start": {
+                    "type": "string"
+                },
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["code"],
+                        "additionalProperties": false,
+                        "properties": {
+                            "code": {
+                                "$ref": "/schema/card_schema.json#/$defs/card_code"
+                            },
+                            "xp": {
+                                "type": "number"
+                            },
+                            "exceptional": {
+                                "type": "number"
+                            },
+                            "deck_limit": {
+                                "type": "number"
+                            },
+                            "deck_options": {
+                                "$comment": "Copied from card_schema.json. Maybe later make a $ref.",
+                                "oneOf": [
+                                    {
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "deck_requirements": {
+                                "$comment": "Copied from card_schema.json. Maybe later make a $ref.",
+                                "oneOf": [
+                                    {
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "text": {
+                                "type": "string",
+                                "minLength": 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

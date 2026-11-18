@@ -7,29 +7,31 @@ import { styleText } from "node:util";
 import Ajv from "ajv/dist/2020.js";
 
 function makeAJVSchemaErrorMessage(ajvError: AJVErrorObject): string {
+    const instancePathString = styleText('dim', `instancePath: ${ajvError.instancePath}`)
+
     if (ajvError.keyword === "required") {
         const propertyName = ajvError.params.missingProperty;
 
-        return `Missing required property '${propertyName}'`;
+        return `Missing required property '${propertyName}' ${instancePathString}`;
     }
 
     if (ajvError.keyword === "additionalProperties") {
         const additionalProperty = ajvError.params.additionalProperty;
 
-        return `Unexpected property '${additionalProperty}'`;
+        return `Unexpected property '${additionalProperty}' ${instancePathString}`;
     }
 
     if(ajvError.keyword === "minLength"){
         const objectPath = ajvError.instancePath.replaceAll('/', '.')
         const min = ajvError.params.limit
 
-        return `${objectPath} was expected to have a length of at least ${min}`;
+        return `${objectPath} was expected to have a length of at least ${min} ${instancePathString}`;
     }
 
 
     return `${ajvError.message}\nkeyword: ${
         ajvError.keyword
-    }\nparams: ${JSON.stringify(ajvError.params)}}`;
+    }\nparams: ${JSON.stringify(ajvError.params)}}\n${instancePathString}`;
 }
 
 class ArkhamLCGDatabaseError extends Error {
@@ -139,6 +141,7 @@ async function makeFindErrorsFunction(schemaFilename: string) {
             schemaPath,
             ARKHAM_LCG_FILE_DATABASE_BASE_PATH
         );
+        ajv.addSchema(schema)
         validate = ajv.compile(schema);
     } catch (error) {
         console.error(
@@ -531,6 +534,7 @@ const [
     findClassSchemaErrors,
     findPackSchemaErrors,
     findTypeSchemaErrors,
+    findTaboosSchemaErrors,
     findGameSceneryTranslationsSchemaErrors,
     findTranslatedCardSchemaErrors,
 ] = await Promise.all([
@@ -539,6 +543,7 @@ const [
     makeFindErrorsFunction("faction_schema.json"),
     makeFindErrorsFunction("pack_schema.json"),
     makeFindErrorsFunction("type_schema.json"),
+    makeFindErrorsFunction("taboos_schema.json"),
     makeFindErrorsFunction("game_scenery_translation_schema.json"),
     makeFindErrorsFunction("translated_card_schema.json"),
 ]);
@@ -605,25 +610,27 @@ const CYCLES_JSON = "cycles.json";
 const CLASSES_JSON = "factions.json";
 const PACKS_JSON = "packs.json";
 const TYPES_JSON = "types.json";
+const TABOOS_JSON = "taboos.json";
 
-const [cyclesP, classesP, packsP, typesP] = [
+const [cyclesP, classesP, packsP, typesP, taboosP] = [
     CYCLES_JSON,
     CLASSES_JSON,
     PACKS_JSON,
     TYPES_JSON,
+    TABOOS_JSON,
 ].map((filename) => loadJSONFile(filename, ARKHAM_LCG_FILE_DATABASE_BASE_PATH));
 
 
 operationsSynchronize.push(
     cyclesP
         .then((cycles) => {
-            const errs = findCyclesSchemaErrors(cycles, "cycles.json");
+            const errs = findCyclesSchemaErrors(cycles, CYCLES_JSON);
             if (errs) {
                 errs.forEach((err) => validationErrors.add(err));
             }
         })
         .catch((e) => {
-            e.message = `Error with cycles.json (${e.message})`;
+            e.message = `Error with ${CYCLES_JSON} (${e.message})`;
             validationErrors.add(e);
         })
 );
@@ -631,13 +638,13 @@ operationsSynchronize.push(
 operationsSynchronize.push(
     classesP
         .then((classes) => {
-            const errs = findClassesSchemaErrors(classes, "factions.json");
+            const errs = findClassesSchemaErrors(classes, CLASSES_JSON);
             if (errs) {
                 errs.forEach((err) => validationErrors.add(err));
             }
         })
         .catch((e) => {
-            e.message = `Error with factions.json (${e.message})`;
+            e.message = `Error with ${CLASSES_JSON} (${e.message})`;
             validationErrors.add(e);
         })
 );
@@ -645,13 +652,13 @@ operationsSynchronize.push(
 operationsSynchronize.push(
     packsP
         .then((packs) => {
-            const errs = findPacksSchemaErrors(packs, "packs.json");
+            const errs = findPacksSchemaErrors(packs, PACKS_JSON);
             if (errs) {
                 errs.forEach((err) => validationErrors.add(err));
             }
         })
         .catch((e) => {
-            e.message = `Error with packs.json (${e.message})`;
+            e.message = `Error with ${PACKS_JSON} (${e.message})`;
             validationErrors.add(e);
         })
 );
@@ -659,16 +666,35 @@ operationsSynchronize.push(
 operationsSynchronize.push(
     typesP
         .then((types) => {
-            const errs = findTypesSchemaErrors(types, "types.json");
+            const errs = findTypesSchemaErrors(types, TYPES_JSON);
             if (errs) {
                 errs.forEach((err) => validationErrors.add(err));
             }
         })
         .catch((e) => {
-            e.message = `Error with types.json (${e.message})`;
+            e.message = `Error with ${TYPES_JSON} (${e.message})`;
             validationErrors.add(e);
         })
 );
+
+operationsSynchronize.push(
+    taboosP
+        .then((taboos) => {
+            const errs = findTaboosSchemaErrors(taboos);
+            if (errs) {
+                errs
+                    .map(err => ArkhamLCGDatabaseError.fromAjvErrorObject(err, TABOOS_JSON))
+                    .forEach((err) => validationErrors.add(err));
+            }
+        })
+        .catch((e) => {
+            e.message = `Error with ${TABOOS_JSON} (${e.message})`;
+            validationErrors.add(e);
+        })
+);
+
+
+
 
 // Verify all pack.cycle_code match a cycle.code
 const cycleForeignKeysInPacksP = Promise.all([cyclesP, packsP]).then(
