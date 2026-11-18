@@ -83,17 +83,6 @@ class ArkhamLCGDatabaseError extends Error {
     }
 }
 
-const ajv = new Ajv({ validateSchema: true, strict: true, allErrors: true });
-
-const BASE_PATH = join(import.meta.dirname, "..");
-
-const ARKHAM_LCG_FILE_DATABASE_BASE_PATH = join(import.meta.dirname, "..");
-const translationDir = "translations";
-
-const validationErrors: Set<Error> = new Set();
-
-const operationsSynchronize: Promise<any>[] = [];
-
 
 /**
  * Load JSON content with custom errors
@@ -176,23 +165,6 @@ async function makeFindErrorsFunction(schemaFilename: string) {
     };
 }
 
-const [
-    findEnglishCardSchemaErrors,
-    findCycleSchemaErrors,
-    findClassSchemaErrors,
-    findPackSchemaErrors,
-    findTypeSchemaErrors,
-    findGameSceneryTranslationsSchemaErrors,
-    findTranslatedCardSchemaErrors,
-] = await Promise.all([
-    makeFindErrorsFunction("card_schema.json"),
-    makeFindErrorsFunction("cycle_schema.json"),
-    makeFindErrorsFunction("faction_schema.json"),
-    makeFindErrorsFunction("pack_schema.json"),
-    makeFindErrorsFunction("type_schema.json"),
-    makeFindErrorsFunction("game_scenery_translation_schema.json"),
-    makeFindErrorsFunction("translated_card_schema.json"),
-]);
 
 function makeFindErrorsArrayWrapper(
     findErrorObject: Awaited<ReturnType<typeof makeFindErrorsFunction>>,
@@ -227,60 +199,6 @@ function makeFindErrorsArrayWrapper(
         else return undefined;
     };
 }
-
-/**
- * This function is a wrapper around findCycleErrors because cycle_schema.json
- * only validates single cycle objects
- *
- * @param {Array<any>} cycles
- */
-const findCyclesSchemaErrors = makeFindErrorsArrayWrapper(
-    findCycleSchemaErrors
-);
-
-/**
- * This function is a wrapper around findClassErrors because faction_schema.json
- * only validates single class objects
- *
- * @param {Array<any>} classes
- */
-const findClassesSchemaErrors = makeFindErrorsArrayWrapper(
-    findClassSchemaErrors
-);
-
-/**
- * This function is a wrapper around findPackErrors because pack_schema.json
- * only validates single pack objects
- *
- * @param {Array<any>} packs
- */
-const findPacksSchemaErrors = makeFindErrorsArrayWrapper(findPackSchemaErrors);
-
-/**
- * This function is a wrapper around findTypeErrors because type_schema.json
- * only validates single type objects
- *
- * @param {Array<any>} types
- */
-const findTypesSchemaErrors = makeFindErrorsArrayWrapper(findTypeSchemaErrors);
-
-/**
- * This function is a wrapper around findCardErrors because card_schema.json
- * only validates single card objects
- *
- * @param {Array<any>} types
- */
-const findEnglishCardsSchemaErrors = makeFindErrorsArrayWrapper(findEnglishCardSchemaErrors, true);
-
-
-/**
- * This function is a wrapper around findCardErrors because translated_card_schema.json
- * only validates single card objects
- *
- * @param {Array<any>} types
- */
-const findTranslatedCardsSchemaErrors = makeFindErrorsArrayWrapper(findTranslatedCardSchemaErrors, true);
-
 
 
 function findCardsForeignKeyErrors(
@@ -340,110 +258,6 @@ function findCardsForeignKeyErrors(
         return errors;
     }
 }
-
-const CYCLES_JSON = "cycles.json";
-// classes file is called "factions" for legacy reason
-const CLASSES_JSON = "factions.json";
-const PACKS_JSON = "packs.json";
-const TYPES_JSON = "types.json";
-
-const [cyclesP, classesP, packsP, typesP] = [
-    CYCLES_JSON,
-    CLASSES_JSON,
-    PACKS_JSON,
-    TYPES_JSON,
-].map((filename) => loadJSONFile(filename, ARKHAM_LCG_FILE_DATABASE_BASE_PATH));
-
-
-operationsSynchronize.push(
-    cyclesP
-        .then((cycles) => {
-            const errs = findCyclesSchemaErrors(cycles, "cycles.json");
-            if (errs) {
-                errs.forEach((err) => validationErrors.add(err));
-            }
-        })
-        .catch((e) => {
-            e.message = `Error with cycles.json (${e.message})`;
-            validationErrors.add(e);
-        })
-);
-
-operationsSynchronize.push(
-    classesP
-        .then((classes) => {
-            const errs = findClassesSchemaErrors(classes, "factions.json");
-            if (errs) {
-                errs.forEach((err) => validationErrors.add(err));
-            }
-        })
-        .catch((e) => {
-            e.message = `Error with factions.json (${e.message})`;
-            validationErrors.add(e);
-        })
-);
-
-operationsSynchronize.push(
-    packsP
-        .then((packs) => {
-            const errs = findPacksSchemaErrors(packs, "packs.json");
-            if (errs) {
-                errs.forEach((err) => validationErrors.add(err));
-            }
-        })
-        .catch((e) => {
-            e.message = `Error with packs.json (${e.message})`;
-            validationErrors.add(e);
-        })
-);
-
-operationsSynchronize.push(
-    typesP
-        .then((types) => {
-            const errs = findTypesSchemaErrors(types, "types.json");
-            if (errs) {
-                errs.forEach((err) => validationErrors.add(err));
-            }
-        })
-        .catch((e) => {
-            e.message = `Error with types.json (${e.message})`;
-            validationErrors.add(e);
-        })
-);
-
-// Verify all pack.cycle_code match a cycle.code
-const cycleForeignKeysInPacksP = Promise.all([cyclesP, packsP]).then(
-    ([cycles, packs]) => {
-        const cycleCodes = new Set(cycles.map((c: { code: string }) => c.code));
-        const errors: ArkhamLCGDatabaseError[] = [];
-
-        for (const pack of packs) {
-            if (!cycleCodes.has(pack.cycle_code)) {
-                const e = new ArkhamLCGDatabaseError({
-                    message:
-                        `Pack '${styleText(
-                            "green",
-                            pack.code
-                        )}' has cycle_code '${styleText(
-                            "green",
-                            pack.cycle_code
-                        )}' which is not a valid cycle code\n` +
-                        `ℹ️  Valid cycle codes: ${[...cycleCodes].join(" | ")}`,
-                    filepath: "packs.json",
-                });
-
-                errors.push(e);
-            }
-        }
-
-        if (errors.length >= 1) {
-            errors.forEach((err) => validationErrors.add(err));
-            throw errors;
-        }
-    }
-);
-
-operationsSynchronize.push(cycleForeignKeysInPacksP);
 
 /**
  * All the file paths in the collection can be constructed from the packs.json
@@ -577,60 +391,6 @@ async function findErrorsInEnglishCollectionCards(
     ).then(() => (errorsPs.length >= 1 ? errorsPs : undefined));
 }
 
-operationsSynchronize.push(
-    Promise.all([packsP, classesP, typesP, cycleForeignKeysInPacksP]).then(
-        async ([packs, classes, types]) => {
-            const classCodes: Set<string> = new Set(
-                classes.map((c: { code: any }) => c.code)
-            );
-            const typesCodes: Set<string> = new Set(
-                types.map((t: { code: any }) => t.code)
-            );
-
-            const collectionCardsErrors = await findErrorsInEnglishCollectionCards(
-                packs,
-                classCodes,
-                typesCodes,
-                ARKHAM_LCG_FILE_DATABASE_BASE_PATH
-            );
-            if (collectionCardsErrors) {
-                collectionCardsErrors.forEach((err) =>
-                    validationErrors.add(err)
-                );
-            }
-        }
-    )
-);
-
-
-function findGameSceneryTranslationsErrors(locale: string) {
-    return Promise.all(
-        [CYCLES_JSON, CLASSES_JSON, PACKS_JSON, TYPES_JSON].map((filename) => {
-            const filepath = join(translationDir, locale, filename);
-
-            return loadJSONFile(filepath, ARKHAM_LCG_FILE_DATABASE_BASE_PATH)
-                .then((fileContent) => {
-                    const errors =
-                        findGameSceneryTranslationsSchemaErrors(fileContent);
-                    if (errors) {
-                        errors.forEach((err) =>
-                            validationErrors.add(
-                                ArkhamLCGDatabaseError.fromAjvErrorObject(
-                                    err,
-                                    filepath
-                                )
-                            )
-                        );
-                    }
-                })
-                .catch((e) => {
-                    e.message = `Error with ${filepath} (${e.message})`;
-                    validationErrors.add(e);
-                });
-        })
-    );
-}
-
 
 
 async function findErrorsInTranslationCards(
@@ -720,6 +480,259 @@ function findErrorsInLocaleCollectionCards(
         })
     ).then(() => (errorsPs.length >= 1 ? errorsPs : undefined));
 }
+
+
+
+function findGameSceneryTranslationsErrors(locale: string) {
+    return Promise.all(
+        [CYCLES_JSON, CLASSES_JSON, PACKS_JSON, TYPES_JSON].map((filename) => {
+            const filepath = join(translationDir, locale, filename);
+
+            return loadJSONFile(filepath, ARKHAM_LCG_FILE_DATABASE_BASE_PATH)
+                .then((fileContent) => {
+                    const errors =
+                        findGameSceneryTranslationsSchemaErrors(fileContent);
+                    if (errors) {
+                        errors.forEach((err) =>
+                            validationErrors.add(
+                                ArkhamLCGDatabaseError.fromAjvErrorObject(
+                                    err,
+                                    filepath
+                                )
+                            )
+                        );
+                    }
+                })
+                .catch((e) => {
+                    e.message = `Error with ${filepath} (${e.message})`;
+                    validationErrors.add(e);
+                });
+        })
+    );
+}
+
+
+/**
+ * Validation operations
+ */
+
+const ajv = new Ajv({ validateSchema: true, strict: true, allErrors: true });
+
+const ARKHAM_LCG_FILE_DATABASE_BASE_PATH = join(import.meta.dirname, "..");
+const translationDir = "translations";
+
+const validationErrors: Set<Error> = new Set();
+
+const operationsSynchronize: Promise<any>[] = [];
+
+const [
+    findEnglishCardSchemaErrors,
+    findCycleSchemaErrors,
+    findClassSchemaErrors,
+    findPackSchemaErrors,
+    findTypeSchemaErrors,
+    findGameSceneryTranslationsSchemaErrors,
+    findTranslatedCardSchemaErrors,
+] = await Promise.all([
+    makeFindErrorsFunction("card_schema.json"),
+    makeFindErrorsFunction("cycle_schema.json"),
+    makeFindErrorsFunction("faction_schema.json"),
+    makeFindErrorsFunction("pack_schema.json"),
+    makeFindErrorsFunction("type_schema.json"),
+    makeFindErrorsFunction("game_scenery_translation_schema.json"),
+    makeFindErrorsFunction("translated_card_schema.json"),
+]);
+
+
+
+/**
+ * This function is a wrapper around findCycleErrors because cycle_schema.json
+ * only validates single cycle objects
+ *
+ * @param {Array<any>} cycles
+ */
+const findCyclesSchemaErrors = makeFindErrorsArrayWrapper(
+    findCycleSchemaErrors
+);
+
+/**
+ * This function is a wrapper around findClassErrors because faction_schema.json
+ * only validates single class objects
+ *
+ * @param {Array<any>} classes
+ */
+const findClassesSchemaErrors = makeFindErrorsArrayWrapper(
+    findClassSchemaErrors
+);
+
+/**
+ * This function is a wrapper around findPackErrors because pack_schema.json
+ * only validates single pack objects
+ *
+ * @param {Array<any>} packs
+ */
+const findPacksSchemaErrors = makeFindErrorsArrayWrapper(findPackSchemaErrors);
+
+/**
+ * This function is a wrapper around findTypeErrors because type_schema.json
+ * only validates single type objects
+ *
+ * @param {Array<any>} types
+ */
+const findTypesSchemaErrors = makeFindErrorsArrayWrapper(findTypeSchemaErrors);
+
+/**
+ * This function is a wrapper around findCardErrors because card_schema.json
+ * only validates single card objects
+ *
+ * @param {Array<any>} types
+ */
+const findEnglishCardsSchemaErrors = makeFindErrorsArrayWrapper(findEnglishCardSchemaErrors, true);
+
+
+/**
+ * This function is a wrapper around findCardErrors because translated_card_schema.json
+ * only validates single card objects
+ *
+ * @param {Array<any>} types
+ */
+const findTranslatedCardsSchemaErrors = makeFindErrorsArrayWrapper(findTranslatedCardSchemaErrors, true);
+
+
+
+const CYCLES_JSON = "cycles.json";
+// classes file is called "factions" for legacy reason
+const CLASSES_JSON = "factions.json";
+const PACKS_JSON = "packs.json";
+const TYPES_JSON = "types.json";
+
+const [cyclesP, classesP, packsP, typesP] = [
+    CYCLES_JSON,
+    CLASSES_JSON,
+    PACKS_JSON,
+    TYPES_JSON,
+].map((filename) => loadJSONFile(filename, ARKHAM_LCG_FILE_DATABASE_BASE_PATH));
+
+
+operationsSynchronize.push(
+    cyclesP
+        .then((cycles) => {
+            const errs = findCyclesSchemaErrors(cycles, "cycles.json");
+            if (errs) {
+                errs.forEach((err) => validationErrors.add(err));
+            }
+        })
+        .catch((e) => {
+            e.message = `Error with cycles.json (${e.message})`;
+            validationErrors.add(e);
+        })
+);
+
+operationsSynchronize.push(
+    classesP
+        .then((classes) => {
+            const errs = findClassesSchemaErrors(classes, "factions.json");
+            if (errs) {
+                errs.forEach((err) => validationErrors.add(err));
+            }
+        })
+        .catch((e) => {
+            e.message = `Error with factions.json (${e.message})`;
+            validationErrors.add(e);
+        })
+);
+
+operationsSynchronize.push(
+    packsP
+        .then((packs) => {
+            const errs = findPacksSchemaErrors(packs, "packs.json");
+            if (errs) {
+                errs.forEach((err) => validationErrors.add(err));
+            }
+        })
+        .catch((e) => {
+            e.message = `Error with packs.json (${e.message})`;
+            validationErrors.add(e);
+        })
+);
+
+operationsSynchronize.push(
+    typesP
+        .then((types) => {
+            const errs = findTypesSchemaErrors(types, "types.json");
+            if (errs) {
+                errs.forEach((err) => validationErrors.add(err));
+            }
+        })
+        .catch((e) => {
+            e.message = `Error with types.json (${e.message})`;
+            validationErrors.add(e);
+        })
+);
+
+// Verify all pack.cycle_code match a cycle.code
+const cycleForeignKeysInPacksP = Promise.all([cyclesP, packsP]).then(
+    ([cycles, packs]) => {
+        const cycleCodes = new Set(cycles.map((c: { code: string }) => c.code));
+        const errors: ArkhamLCGDatabaseError[] = [];
+
+        for (const pack of packs) {
+            if (!cycleCodes.has(pack.cycle_code)) {
+                const e = new ArkhamLCGDatabaseError({
+                    message:
+                        `Pack '${styleText(
+                            "green",
+                            pack.code
+                        )}' has cycle_code '${styleText(
+                            "green",
+                            pack.cycle_code
+                        )}' which is not a valid cycle code\n` +
+                        `ℹ️  Valid cycle codes: ${[...cycleCodes].join(" | ")}`,
+                    filepath: "packs.json",
+                });
+
+                errors.push(e);
+            }
+        }
+
+        if (errors.length >= 1) {
+            errors.forEach((err) => validationErrors.add(err));
+            throw errors;
+        }
+    }
+);
+
+operationsSynchronize.push(cycleForeignKeysInPacksP);
+
+
+
+operationsSynchronize.push(
+    Promise.all([packsP, classesP, typesP, cycleForeignKeysInPacksP]).then(
+        async ([packs, classes, types]) => {
+            const classCodes: Set<string> = new Set(
+                classes.map((c: { code: any }) => c.code)
+            );
+            const typesCodes: Set<string> = new Set(
+                types.map((t: { code: any }) => t.code)
+            );
+
+            const collectionCardsErrors = await findErrorsInEnglishCollectionCards(
+                packs,
+                classCodes,
+                typesCodes,
+                ARKHAM_LCG_FILE_DATABASE_BASE_PATH
+            );
+            if (collectionCardsErrors) {
+                collectionCardsErrors.forEach((err) =>
+                    validationErrors.add(err)
+                );
+            }
+        }
+    )
+);
+
+
+
 
 const localesP = readdir(
     join(ARKHAM_LCG_FILE_DATABASE_BASE_PATH, translationDir)
