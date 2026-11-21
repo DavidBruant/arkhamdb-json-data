@@ -141,7 +141,6 @@ async function makeFindErrorsFunction(schemaFilename: string) {
             schemaPath,
             ARKHAM_LCG_FILE_DATABASE_BASE_PATH
         );
-        ajv.addSchema(schema)
         validate = ajv.compile(schema);
     } catch (error) {
         console.error(
@@ -527,6 +526,62 @@ const translationDir = "translations";
 const validationErrors: Set<Error> = new Set();
 
 const operationsSynchronize: Promise<any>[] = [];
+
+// Load all schemas
+const [
+    cardSchema,
+    cycleSchema,
+    factionSchema,
+    packSchema,
+    typeSchema,
+    taboosSchema,
+    gameSceneryTranslationSchema,
+    translatedCardSchema
+] = await Promise.all([
+        "card_schema.json",
+        "cycle_schema.json",
+        "faction_schema.json",
+        "pack_schema.json",
+        "type_schema.json",
+        "taboos_schema.json",
+        "game_scenery_translation_schema.json",
+        "translated_card_schema.json",
+    ].map(filename => loadJSONFile(join('schema', filename), ARKHAM_LCG_FILE_DATABASE_BASE_PATH)
+        .catch (error => {
+            console.error(
+                styleText(["bold", "red"], "Error"),
+                "Schema error for",
+                filename
+            );
+            // @ts-ignore
+            console.error(error.toString());
+            console.error(
+                "The schema at",
+                filename,
+                "needs to be fixed before validation can continue"
+            );
+            process.exit(1);
+        })
+    )
+)
+
+for(const schema of [
+    cardSchema,
+    cycleSchema,
+    factionSchema,
+    packSchema,
+    typeSchema,
+    taboosSchema,
+    gameSceneryTranslationSchema,
+    translatedCardSchema
+]){
+    ajv.addSchema(schema)
+}
+
+
+throw `PPP make makeFindErrorsFunction take a schema as argument instead of path`
+
+
 
 const [
     findEnglishCardSchemaErrors,
